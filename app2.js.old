@@ -1,0 +1,60 @@
+var express = require('express');
+var multiparty = require('multiparty');
+var spawn = require('child_process').spawn;
+
+
+
+var app = express();
+
+
+
+
+app.get('/',function(req,res){
+console.log('New Request');
+res.send('OK!');
+res.end();
+});
+app.post('/upload',function(req,res){
+	var proc=false;
+	var form = new multiparty.Form();
+	form.parse(req,function(err,fields,files){
+	var path = files.file[0].path;
+	proc = spawn('grep',['-a' , 'prn',path]);
+
+	var result;
+	
+	proc.stdout.on('data',function(data){
+		var str = data.toString();
+		var arrstr = str.split('?');
+		arrstr.forEach(function(tmp){
+		 if(tmp.indexOf('prn') === 0)
+			var tmp1 = tmp.split(']');
+			if (Array.isArray(tmp1)) {
+				if(tmp1.length > 1){
+					console.log(tmp1[0].toString());
+					res.write(tmp1[0].toString());
+				}
+			
+			}	
+			
+		});
+	res.end();	
+	});
+	
+	});
+	
+
+});
+
+
+app.put('/',function(req,res){
+
+
+	console.log(req);
+	res.send('OK!');
+	res.end();
+
+});
+app.listen(80);
+
+
